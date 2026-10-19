@@ -127,6 +127,13 @@ the system rather than hardcoded hex.
 Texture and detail: fixed film grain overlay, oversized faint section numerals,
 hairline rules between sections, accent-coloured `::selection`.
 
+The hero is a two-column spread: the statement in columns 1–7, the supporting
+copy in columns 8–12 beside it. The copy was previously indented to column 4,
+which left a void of exactly equal width either side of it — 306px and 306px at
+1440 — and the hero read as a hole in the middle of the page. Side by side
+there is no hole, the copy reaches the content's right edge, and the hero is
+201px shorter.
+
 Motion: slow fade + rise on scroll (IntersectionObserver, no animation library),
 one CSS marquee (pauses on hover), underline-draw links. All of it respects
 `prefers-reduced-motion`.

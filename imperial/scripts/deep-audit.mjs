@@ -482,5 +482,61 @@ await contrast.close();
   report.workRowBand = rows;
 }
 
+/* ---------- 12. Hero composition: is the copy a column, or a hole? ----------
+   The supporting copy used to be indented to column 4, which left a void of
+   exactly equal width on each side of it (306px and 306px at 1440) and read
+   as a hole in the middle of the hero. The copy should now sit in its own
+   column on the right, reaching the content's right edge, with the headline
+   beside it — and the headline must not wrap to a third line. */
+{
+  const heroes = [];
+  for (const width of [1920, 1600, 1440, 1280, 1152, 1024]) {
+    const page = await browser.newPage({ viewport: { width, height: 900 } });
+    await page.goto(BASE, { waitUntil: "networkidle" });
+    await page.addStyleTag({ content: "html{scroll-behavior:auto !important}" });
+    await page.waitForTimeout(400);
+    const h = await page.evaluate(() => {
+      const h1 = document.querySelector("h1");
+      const range = document.createRange();
+      range.selectNodeContents(h1);
+      const lines = [...range.getClientRects()];
+      const lede = document.querySelector("header .max-w-\\[54ch\\]");
+      const paras = [...lede.querySelectorAll("p")];
+      const contentEl = document.querySelector("header .max-w-7xl");
+      const content = contentEl.getBoundingClientRect();
+      const pad = parseFloat(getComputedStyle(contentEl).paddingLeft);
+      const cL = content.left + pad;
+      const cR = content.right - pad;
+      const pR = Math.max(...paras.map((p) => p.getBoundingClientRect().right));
+      const pL = Math.min(...paras.map((p) => p.getBoundingClientRect().left));
+      return {
+        h1Lines: lines.length,
+        h1Right: Math.round(Math.max(...lines.map((l) => l.right))),
+        copyLeft: Math.round(pL),
+        copyRight: Math.round(pR),
+        contentLeft: Math.round(cL),
+        contentRight: Math.round(cR),
+        rightVoid: Math.round(cR - pR),
+        leftVoid: Math.round(pL - cL),
+        heroHeight: Math.round(
+          document.querySelector("header").getBoundingClientRect().height,
+        ),
+        h1OverlapsCopy:
+          Math.max(...lines.map((l) => l.right)) > pL,
+      };
+    });
+    heroes.push({
+      width,
+      ...h,
+      copyInRightHalf: h.copyLeft > (h.contentLeft + h.contentRight) / 2,
+      copyReachesEdge: h.rightVoid <= 1,
+      headlineTooLong: h.h1Lines > 2,
+      overlap: h.h1OverlapsCopy,
+    });
+    await page.close();
+  }
+  report.heroComposition = heroes;
+}
+
 await browser.close();
 console.log(JSON.stringify(report, null, 2));

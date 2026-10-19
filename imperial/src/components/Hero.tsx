@@ -24,14 +24,17 @@ export default function Hero() {
 
         {/* the statement */}
         <div className="grid grid-cols-1 gap-y-12 pt-14 lg:grid-cols-12 lg:gap-x-10 lg:pt-24">
-          <div className="lg:col-span-9">
+          <div className="lg:col-span-7">
             <h1 className="text-[clamp(2.75rem,8.4vw,7.25rem)] leading-[0.92] text-ink">
               {site.headline}
             </h1>
           </div>
 
-          {/* lede sits indented, opened by a short accent rule — asymmetry with intent */}
-          <div className="max-w-[54ch] lg:col-start-4 lg:col-end-10">
+          {/* The supporting copy gets its own column beside the statement.
+              It used to be indented to column 4, which left a void of equal
+              width on each side of it — 306px of nothing left and right —
+              and the hero read as a hole in the middle of the page. */}
+          <div className="max-w-[54ch] lg:col-start-8 lg:col-span-5 lg:max-w-none">
             <div className="mb-10 h-px w-16 bg-accent" aria-hidden="true" />
             <p className="text-[1.0625rem] leading-relaxed text-muted sm:text-[1.15rem]">
               {site.lede}
