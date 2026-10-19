@@ -133,31 +133,52 @@ const out = {};
 {
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
   await page.goto(BASE, { waitUntil: "networkidle" });
-  await page.locator("#work").scrollIntoViewIfNeeded();
-  await page.waitForTimeout(500);
-  const rows = page.locator(".work-row");
-  await rows.nth(2).focus();
-  await page.waitForTimeout(800);
-  out.keyboardPreview = await page.evaluate(() => {
-    const pv = document.querySelector(".work-preview");
-    const pr = pv.getBoundingClientRect();
-    const rows = [...document.querySelectorAll(".work-row")].map((r) => {
-      const rr = r.getBoundingClientRect();
-      return { t: r.querySelector("h3").textContent, mid: (rr.top + rr.bottom) / 2 };
+  await page.addStyleTag({ content: "html{scroll-behavior:auto !important}" });
+  await page.evaluate(() => {
+    const el = document.querySelector("#work");
+    window.scrollTo({
+      top: el.getBoundingClientRect().top + window.scrollY - 40,
+      behavior: "instant",
     });
-    return {
-      previewMid: Math.round((pr.top + pr.bottom) / 2),
-      nearest: rows.reduce((a, b) =>
-        Math.abs(b.mid - (pr.top + pr.bottom) / 2) <
-        Math.abs(a.mid - (pr.top + pr.bottom) / 2)
-          ? b
-          : a,
-      ).t,
-      caption: document
-        .querySelector(".work-preview p")
-        .textContent.trim(),
-    };
   });
+  await page.waitForTimeout(800);
+  const rows = page.locator(".work-row");
+  const caption = () =>
+    page.evaluate(
+      () => document.querySelector(".work-preview p").textContent.trim(),
+    );
+
+  await rows.nth(2).focus();
+  await page.waitForTimeout(700);
+  const afterFocus = await caption();
+
+  // pointer wins while it is over the list
+  await rows.nth(0).hover();
+  await page.waitForTimeout(700);
+  const whileHovering = await caption();
+
+  // pointer leaves the list -> keyboard focus takes over again
+  await page.mouse.move(1380, 60);
+  await page.waitForTimeout(700);
+  const afterPointerLeft = await caption();
+
+  // nothing hovered, nothing focused -> the default project
+  await page.evaluate(() => document.activeElement?.blur());
+  await page.waitForTimeout(700);
+  const afterBlur = await caption();
+
+  out.keyboardPreview = {
+    afterFocus,
+    whileHovering,
+    afterPointerLeft,
+    afterBlur,
+    expected: {
+      afterFocus: "Terra — live",
+      whileHovering: "Lumen — live",
+      afterPointerLeft: "Terra — live",
+      afterBlur: "Lumen — live",
+    },
+  };
   await page.close();
 }
 

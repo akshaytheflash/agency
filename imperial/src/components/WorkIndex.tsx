@@ -14,12 +14,16 @@ import Reveal from "./Reveal";
  * so the picture and the title it belongs to are never in different places.
  * On touch devices the thumbnail sits permanently under the row instead.
  *
+ * Which row is "current" is derived from two signals: the pointer wins while
+ * it is over the list, keyboard focus is the fallback, and the first project
+ * is the default so the preview column is never dead space.
+ *
  * Every row links to the real deployed URL.
  */
 export default function WorkIndex() {
-  // Defaults to the first project so the preview column is never dead space;
-  // hovering a row swaps it and moves it, pointer-out returns to the first.
-  const [active, setActive] = useState<string>(work[0].id);
+  const [hovered, setHovered] = useState<string | null>(null);
+  const [focused, setFocused] = useState<string | null>(null);
+  const active = hovered ?? focused ?? work[0].id;
   const activeItem = work.find((w) => w.id === active) ?? work[0];
 
   const listRef = useRef<HTMLUListElement | null>(null);
@@ -31,10 +35,16 @@ export default function WorkIndex() {
   // preview column to align to).
   const [anchor, setAnchor] = useState<number | null>(null);
 
+  // `measure` reads the current active row through a ref so the function
+  // itself stays stable — otherwise every hover would tear down and rebuild
+  // the ResizeObserver.
+  const activeRef = useRef(active);
+  activeRef.current = active;
+
   const measure = useCallback(() => {
     const list = listRef.current;
     const preview = previewRef.current;
-    const row = rowRefs.current[active];
+    const row = rowRefs.current[activeRef.current];
     if (!list || !preview || !row) return;
 
     // `display: none` on small screens — nothing to align to.
@@ -57,11 +67,11 @@ export default function WorkIndex() {
     setAnchor((prev) =>
       prev === null || Math.abs(prev - centre) > 0.5 ? centre : prev,
     );
-  }, [active]);
+  }, []);
 
   useLayoutEffect(() => {
     measure();
-  }, [measure]);
+  }, [active, measure]);
 
   useEffect(() => {
     const list = listRef.current;
@@ -152,7 +162,26 @@ export default function WorkIndex() {
             </div>
           </div>
 
-          <ul ref={listRef} className="relative lg:w-[62%]">
+          <ul
+            ref={listRef}
+            className="relative lg:w-[62%]"
+            /* The pointer owns the preview while it is over the list; once it
+               leaves, keyboard focus takes over, and the first project is the
+               final fallback. */
+            onMouseLeave={() => setHovered(null)}
+            onFocus={(e) => {
+              const row = (e.target as HTMLElement).closest<HTMLElement>(
+                "[data-work-id]",
+              );
+              if (row?.dataset.workId) setFocused(row.dataset.workId);
+            }}
+            onBlur={(e) => {
+              // only clear when focus leaves the list entirely
+              if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+                setFocused(null);
+              }
+            }}
+          >
             {work.map((w, i) => (
               <Reveal
                 as="li"
@@ -173,10 +202,8 @@ export default function WorkIndex() {
                   href={w.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onFocus={() => setActive(w.id)}
-                  onBlur={() => setActive(work[0].id)}
-                  onMouseEnter={() => setActive(w.id)}
-                  onMouseLeave={() => setActive(work[0].id)}
+                  data-work-id={w.id}
+                  onMouseEnter={() => setHovered(w.id)}
                   className="work-row group grid grid-cols-1 items-start gap-x-6 gap-y-3 py-8 transition-colors duration-500 hover:bg-shade sm:grid-cols-[1fr_auto] sm:py-10"
                 >
                   <div className="min-w-0">
