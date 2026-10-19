@@ -414,5 +414,73 @@ await contrast.close();
   report.ghostNumeral = numeralCollisions;
 }
 
+/* ---------- 11. Work rows: does the text sit inside the hover band? ----------
+   The hover tint is a full-bleed band. If the row has no horizontal padding
+   the title and the blurb sit flush against the band's edge, which reads as
+   a mis-registered box rather than a highlight. The text must have margin on
+   both sides, the band must stay clear of the preview column, and the band
+   and the hairline rule must share the same edges. */
+{
+  const rows = [];
+  for (const width of [1440, 1280, 1024, 820, 390]) {
+    const page = await browser.newPage({ viewport: { width, height: 900 } });
+    await page.goto(BASE, { waitUntil: "networkidle" });
+    await page.addStyleTag({ content: "html{scroll-behavior:auto !important}" });
+    await page.evaluate(() => {
+      const el = document.querySelector("#work");
+      window.scrollTo({
+        top: el.getBoundingClientRect().top + window.scrollY,
+        behavior: "instant",
+      });
+    });
+    await page.waitForTimeout(500);
+    const row = await page.evaluate(() => {
+      const a = document.querySelector("#work .work-row");
+      const li = a.closest("li");
+      const h3 = a.querySelector("h3");
+      const blurb = a.querySelector("p");
+      const year = a.querySelector(".tabular-nums");
+      const preview = document.querySelector(".work-preview");
+      const tick = document.querySelector(".work-tick");
+      const R = (el) => el.getBoundingClientRect();
+      const ar = R(a);
+      const lr = R(li);
+      // the preview column and the tick only exist at lg and up
+      const previewShown = preview.offsetParent !== null;
+      const tickShown = tick.offsetParent !== null;
+      return {
+        bandLeft: Math.round(ar.left),
+        bandRight: Math.round(ar.right),
+        ruleLeft: Math.round(lr.left),
+        ruleRight: Math.round(lr.right),
+        textLeft: Math.round(R(h3).left),
+        blurbLeft: Math.round(R(blurb).left),
+        yearRight: Math.round(R(year).right),
+        previewLeft: previewShown ? Math.round(R(preview).left) : null,
+        tickLeft: tickShown ? Math.round(R(tick).left) : null,
+      };
+    });
+    rows.push({
+      width,
+      textMarginLeft: row.textLeft - row.bandLeft,
+      blurbMarginLeft: row.blurbLeft - row.bandLeft,
+      yearMarginRight: row.bandRight - row.yearRight,
+      bandMatchesRule:
+        row.bandLeft === row.ruleLeft && row.bandRight === row.ruleRight,
+      gutterToPreview:
+        row.previewLeft === null ? null : row.previewLeft - row.bandRight,
+      tickToText: row.tickLeft === null ? null : row.textLeft - row.tickLeft,
+      flushLeft: row.textLeft - row.bandLeft < 12,
+      flushRight: row.bandRight - row.yearRight < 12,
+      ruleMismatch:
+        row.bandLeft !== row.ruleLeft || row.bandRight !== row.ruleRight,
+      crowdsPreview:
+        row.previewLeft !== null && row.previewLeft - row.bandRight < 24,
+    });
+    await page.close();
+  }
+  report.workRowBand = rows;
+}
+
 await browser.close();
 console.log(JSON.stringify(report, null, 2));

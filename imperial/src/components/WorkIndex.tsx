@@ -166,7 +166,9 @@ export default function WorkIndex() {
 
           <ul
             ref={listRef}
-            className="relative lg:w-[62%]"
+            /* 60% rather than 62% so the hover band below keeps a clean 47px
+                gutter to the preview column once it bleeds outward. */
+            className="relative lg:w-[60%]"
             /* The pointer owns the preview while it is over the list; once it
                leaves, keyboard focus takes over, and the first project is the
                final fallback. */
@@ -192,11 +194,15 @@ export default function WorkIndex() {
                 ref={(node) => {
                   rowRefs.current[w.id] = node;
                 }}
-                className="relative border-t border-line last:border-b"
+                /* The row is a band: the rules and the hover tint bleed out
+                   into the container gutter (half of it, so they never reach
+                   the viewport edge) and the text sits inside with margin.
+                   Without this the title was flush against the tint's edge. */
+                className="relative -mx-3 border-t border-line last:border-b sm:-mx-4 lg:-mx-6"
               >
                 <span
                   aria-hidden="true"
-                  className={`work-tick absolute top-0 -left-3 hidden h-full w-[2px] origin-top bg-accent lg:block ${
+                  className={`work-tick absolute top-0 left-0 hidden h-full w-[2px] origin-top bg-accent lg:left-3 lg:block ${
                     active === w.id ? "is-on" : ""
                   }`}
                 />
@@ -206,7 +212,7 @@ export default function WorkIndex() {
                   rel="noopener noreferrer"
                   data-work-id={w.id}
                   onMouseEnter={() => setHovered(w.id)}
-                  className="work-row group grid grid-cols-1 items-start gap-x-6 gap-y-3 py-8 transition-colors duration-500 hover:bg-shade sm:grid-cols-[1fr_auto] sm:py-10"
+                  className="work-row group grid grid-cols-1 items-start gap-x-6 gap-y-3 px-3 py-8 transition-colors duration-500 hover:bg-shade sm:grid-cols-[1fr_auto] sm:px-4 sm:py-10 lg:px-6"
                 >
                   <div className="min-w-0">
                     <div className="flex items-baseline gap-4">

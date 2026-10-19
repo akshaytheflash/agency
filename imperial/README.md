@@ -108,6 +108,15 @@ screenshot and the title it belongs to are never in different places. A 2px
 accent tick marks the active row in the left gutter. All three previews stay
 mounted and cross-fade, so swapping them never blanks the frame.
 
+Each row is a **band**: the hairline rules and the hover tint bleed out into
+the container gutter by half its width (12px / 16px / 24px as the container
+padding grows), and the text sits inside with the same margin. Without that
+the title was flush against the tint's edge and read as a mis-registered box
+rather than a highlight. The band and the rules share the same edges, so the
+highlight never looks like it is poking out from under the rule, and the
+list column is 60% (not 62%) so the band keeps a clean gutter to the preview
+panel beside it.
+
 ## Design system
 
 Two typefaces: **Instrument Serif** (display, via `next/font`) and **Inter**
