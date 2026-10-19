@@ -92,11 +92,13 @@ export default function WorkIndex() {
       className="scroll-mt-4 border-b border-line"
     >
       <div className="mx-auto w-full max-w-7xl px-6 pb-16 pt-20 sm:px-8 lg:px-12 lg:pb-24 lg:pt-28">
-        {/* section label — oversized faint numeral behind the word */}
+        {/* section label — oversized faint numeral behind the word.
+            The numeral hangs from the top of the section, clear of the eyebrow
+            below it: at 10rem its ink ran 3px into "01 / Selected work". */}
         <div className="relative pt-20 pb-10 lg:pt-28">
           <span
             aria-hidden="true"
-            className="font-display absolute -top-4 -left-2 text-[7rem] leading-none text-ink opacity-[0.05] select-none lg:text-[10rem]"
+            className="font-display absolute -top-10 left-0 text-[7rem] leading-none text-ink opacity-[0.05] select-none lg:-top-14 lg:text-[10rem]"
           >
             01
           </span>

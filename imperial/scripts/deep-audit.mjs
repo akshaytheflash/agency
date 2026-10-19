@@ -301,5 +301,118 @@ await contrast.close();
   await page.close();
 }
 
+/* ---------- 10. Ghost numeral vs section eyebrow: do they collide? ----------
+   The oversized faint numeral is a watermark, but it is real type: at 10rem
+   its ink ran 3px into the "01 / Selected work" eyebrow. Layout boxes do not
+   show this — the glyphs sit lower inside their leading-none line box than
+   the box suggests — so this measures the painted pixels directly.
+
+   Each element is rendered alone (everything else in the section is hidden,
+   the grain overlay is off) and the ink is found by thresholding against the
+   background. The gap must be positive. */
+{
+  const sharp = (await import("sharp")).default;
+  const NUM_ISOLATE = `.grain{display:none!important}
+    #work *{visibility:hidden!important}
+    #work .font-display[aria-hidden='true']{visibility:visible!important}`;
+  const LABEL_ISOLATE = `.grain{display:none!important}
+    #work *{visibility:hidden!important}
+    #work p.text-accent{visibility:visible!important}`;
+
+  const inkBox = async (page, css, sel, pad) => {
+    const tag = await page.addStyleTag({ content: css });
+    await page.waitForTimeout(150);
+    const r = await page.evaluate(
+      ({ s, p }) => {
+        const b = document.querySelector(s).getBoundingClientRect();
+        return {
+          x: Math.floor(b.left) - 4,
+          y: Math.floor(b.top) - p,
+          width: Math.ceil(b.width) + 8,
+          height: Math.ceil(b.height) + p * 2,
+        };
+      },
+      { s: sel, p: pad },
+    );
+    const cy = Math.max(0, r.y);
+    const buf = await page.screenshot({
+      clip: { x: Math.max(0, r.x), y: cy, width: r.width, height: r.height },
+    });
+    const { data, info } = await sharp(buf)
+      .raw()
+      .toBuffer({ resolveWithObject: true });
+    const { width, height, channels } = info;
+    let top = null;
+    let bot = null;
+    for (let y = 0; y < height; y++) {
+      let n = 0;
+      for (let x = 0; x < width; x++) {
+        const i = (y * width + x) * channels;
+        // background is #0e0e0c (14) in the dark themes; the 5% ghost ink
+        // lands around 25. The label is full-strength accent.
+        if (Math.max(data[i], data[i + 1], data[i + 2]) > 20) n++;
+      }
+      if (n >= 2) {
+        if (top === null) top = y;
+        bot = y;
+      }
+    }
+    await page.evaluate((t) => t.remove(), tag);
+    return { top: top === null ? null : top + cy, bot: bot === null ? null : bot + cy };
+  };
+
+  const numeralCollisions = [];
+  for (const width of [1440, 1280, 1024, 820, 390]) {
+    const page = await browser.newPage({ viewport: { width, height: 900 } });
+    await page.goto(BASE, { waitUntil: "networkidle" });
+    await page.addStyleTag({
+      content: "html{scroll-behavior:auto !important}",
+    });
+    await page.evaluate(() => {
+      const el = document.querySelector("#work");
+      window.scrollTo({
+        top: el.getBoundingClientRect().top + window.scrollY,
+        behavior: "instant",
+      });
+    });
+    await page.waitForTimeout(600);
+
+    const num = await inkBox(
+      page,
+      NUM_ISOLATE,
+      "#work .font-display[aria-hidden='true']",
+      80,
+    );
+    const label = await inkBox(page, LABEL_ISOLATE, "#work p.text-accent", 30);
+    const geo = await page.evaluate(() => {
+      const n = document
+        .querySelector("#work .font-display[aria-hidden='true']")
+        .getBoundingClientRect();
+      const l = document.querySelector("#work p.text-accent").getBoundingClientRect();
+      const s = document.querySelector("#work").getBoundingClientRect();
+      return {
+        numeralLeft: Math.round(n.left),
+        labelLeft: Math.round(l.left),
+        sectionTop: Math.round(s.top),
+      };
+    });
+
+    const gap = label.top - num.bot;
+    numeralCollisions.push({
+      width,
+      gapPx: gap,
+      collides: gap < 0,
+      tooTight: gap >= 0 && gap < 24,
+      leftAligned: geo.numeralLeft === geo.labelLeft,
+      numeralInk: [num.top, num.bot],
+      labelInkTop: label.top,
+      inkTopBelowSectionTop: num.top - geo.sectionTop,
+      bleedsAboveSection: num.top < geo.sectionTop,
+    });
+    await page.close();
+  }
+  report.ghostNumeral = numeralCollisions;
+}
+
 await browser.close();
 console.log(JSON.stringify(report, null, 2));
