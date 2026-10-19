@@ -1,0 +1,14 @@
+{
+  "eval_id": 3,
+  "eval_name": "forge-mealprep",
+  "prompt": "I need a landing page for a meal-prep delivery service for people who lift weights. It's called Forge.",
+  "assertions": [
+    {"text": "Uses a restrained neutral palette with at most one accent and no purple/blue or pink/orange gradient"},
+    {"text": "No centered hero with two buttons on a gradient"},
+    {"text": "No 3-card feature grid with icons"},
+    {"text": "Copy is specific (Forge, meal-prep, lifting/weight training) rather than generic AI filler"},
+    {"text": "Uses at most two typefaces, with a distinctive display face"},
+    {"text": "At least one section breaks the container or uses an asymmetric layout"},
+    {"text": "No generic words such as seamlessly, innovative, cutting-edge, empower, unlock, leverage, or next-generation"}
+  ]
+}

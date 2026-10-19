@@ -1,0 +1,228 @@
+@import "tailwindcss";
+
+/*
+  Imperial Development Agency — design tokens
+  -------------------------------------------
+  Four complete art directions live here, selected by [data-theme] on <html>.
+  Every utility (bg-surface, text-ink, border-line, bg-accent…) reads these
+  variables, so switching one attribute re-skins the entire page — not just
+  the accent chip. Change the default in the THEME_DEFAULT constant below the
+  switcher component, or delete the switcher and hardcode one theme.
+*/
+
+:root,
+[data-theme="lime"] {
+  /* Lime — electric, technical. Warm near-black + electric lime. */
+  --bg: #0e0e0c;
+  --surface: #161614;
+  --line: #26261f;
+  --ink: #edeae2;
+  --muted: #8a877e;
+  --accent: #c8ff3d;
+  --accent-ink: #0e0e0c;
+  --shade: #c8ff3d14;
+}
+
+[data-theme="amber"] {
+  /* Amber — warm editorial. Charcoal + burnt amber. */
+  --bg: #131110;
+  --surface: #1b1917;
+  --line: #2e2823;
+  --ink: #f1e9dc;
+  --muted: #97887a;
+  --accent: #d97706;
+  --accent-ink: #131110;
+  --shade: #d9770618;
+}
+
+[data-theme="bone"] {
+  /* Bone — gallery. Light warm paper + imperial pine.
+     The one light direction: prove the system inverts cleanly. */
+  --bg: #ede7da;
+  --surface: #e4dccb;
+  --line: #cdc3ac;
+  --ink: #1a1712;
+  --muted: #6b6253;
+  --accent: #2e5a3e;
+  --accent-ink: #f3efe6;
+  --shade: #2e5a3e12;
+}
+
+[data-theme="ice"] {
+  /* Ice — cold studio. Blue-black + glacier blue. */
+  --bg: #0a0d11;
+  --surface: #12161b;
+  --line: #222a33;
+  --ink: #e7eef4;
+  --muted: #8a96a3;
+  --accent: #7dd3fc;
+  --accent-ink: #06121a;
+  --shade: #7dd3fc14;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-shade: var(--shade);
+
+  --font-display: var(--font-instrument);
+  --font-body: var(--font-inter);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+    font-size: 1.0625rem;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+
+  /* One accent, applied to the selection — a detail template pages never bother with. */
+  ::selection {
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+    border-radius: 1px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display), var(--font-body), ui-serif, Georgia, serif;
+    font-weight: 400;
+    letter-spacing: -0.028em;
+    line-height: 0.96;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+}
+
+/* ---------- Texture: fixed film grain over the whole page ---------- */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- Motion: slow fade + rise. Never bouncy. ----------
+   Scoped to html.js (added pre-paint by an inline script in layout.tsx):
+   with JS on, content starts hidden and is revealed by IntersectionObserver.
+   With JS off there is no .js class, no opacity rule, and every word on the
+   page renders normally. This also avoids a hydration flash, because the
+   server HTML ships `reveal` and .js is already present at first paint. */
+.js .reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 900ms cubic-bezier(0.16, 0.8, 0.24, 1),
+    transform 900ms cubic-bezier(0.16, 0.8, 0.24, 1);
+}
+
+.js .reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Stagger children of a revealed group */
+.stagger > .reveal:nth-child(1) { transition-delay: 0ms; }
+.stagger > .reveal:nth-child(2) { transition-delay: 110ms; }
+.stagger > .reveal:nth-child(3) { transition-delay: 220ms; }
+.stagger > .reveal:nth-child(4) { transition-delay: 330ms; }
+.stagger > .reveal:nth-child(5) { transition-delay: 440ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .js .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .marquee-track { animation: none !important; }
+}
+
+/* ---------- Marquee: pure CSS, duplicated content = seamless loop ---------- */
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 46s linear infinite;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.marquee-mask:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* ---------- Work index: image follows the hovered row ---------- */
+.work-preview {
+  opacity: 0;
+  transform: translateY(-50%) scale(0.985);
+  transition:
+    opacity 500ms cubic-bezier(0.16, 0.8, 0.24, 1),
+    transform 500ms cubic-bezier(0.16, 0.8, 0.24, 1);
+}
+
+.work-preview.is-on {
+  opacity: 1;
+  transform: translateY(-50%) scale(1);
+}
+
+/* Quiet hover: the rule extends, the title shifts a hair. */
+.work-row .work-arrow {
+  transition: transform 450ms cubic-bezier(0.16, 0.8, 0.24, 1);
+}
+
+.work-row:hover .work-arrow,
+.work-row:focus-visible .work-arrow {
+  transform: translate(6px, -6px);
+}
+
+.link-draw {
+  background-image: linear-gradient(var(--accent), var(--accent));
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  transition:
+    background-size 500ms cubic-bezier(0.16, 0.8, 0.24, 1),
+    color 300ms ease;
+}
+
+.link-draw:hover,
+.link-draw:focus-visible {
+  background-size: 100% 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .work-preview,
+  .work-row .work-arrow,
+  .link-draw {
+    transition: none;
+  }
+}

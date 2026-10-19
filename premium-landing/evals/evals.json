@@ -1,0 +1,23 @@
+{
+  "skill_name": "premium-landing",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Build a landing page for a fintech startup called Nova that does instant cross-border payments for freelancers. React + Tailwind.",
+      "expected_output": "A premium, editorial landing page with asymmetric layout, restrained palette, specific copy, and no generic AI patterns.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Make a landing page for our agency — we're a 6-person studio that designs and builds websites for climate tech companies.",
+      "expected_output": "A premium agency page with editorial typography, a work/capability narrative, and no centered hero + 3 cards pattern.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I need a landing page for a meal-prep delivery service for people who lift weights. It's called Forge.",
+      "expected_output": "A premium landing page with strong display type, specific outcome copy, and zero purple gradients or stock-photo cliches.",
+      "files": []
+    }
+  ]
+}

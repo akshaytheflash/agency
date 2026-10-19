@@ -1,0 +1,14 @@
+{
+  "eval_id": 1,
+  "eval_name": "nova-fintech",
+  "prompt": "Build a landing page for a fintech startup called Nova that does instant cross-border payments for freelancers. React + Tailwind.",
+  "assertions": [
+    {"text": "Uses a restrained neutral palette with at most one accent and no purple/blue or pink/orange gradient"},
+    {"text": "No centered hero with two buttons on a gradient"},
+    {"text": "No 3-card feature grid with icons"},
+    {"text": "No stock photography of people at whiteboards or shaking hands"},
+    {"text": "At least one section breaks the container or uses an asymmetric layout"},
+    {"text": "Copy is specific (names Nova, cross-border payments, freelancers) rather than generic AI filler"},
+    {"text": "Uses at most two typefaces, with a distinctive display face"}
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "eval_id": 2,
+  "eval_name": "agency-studio",
+  "prompt": "Make a landing page for our agency — we're a 6-person studio that designs and builds websites for climate tech companies.",
+  "assertions": [
+    {"text": "Uses a restrained neutral palette with at most one accent and no purple/blue or pink/orange gradient"},
+    {"text": "No centered hero with two buttons on a gradient"},
+    {"text": "No 3-card feature grid with icons"},
+    {"text": "At least one section breaks the container or uses an asymmetric layout"},
+    {"text": "Copy is specific (6-person studio, climate tech) rather than generic AI filler"},
+    {"text": "Uses at most two typefaces, with a distinctive display face"},
+    {"text": "Vertical spacing is generous and sections are separated by hairlines or whitespace rather than bordered cards"}
+  ]
+}
