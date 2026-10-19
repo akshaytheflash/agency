@@ -12,14 +12,24 @@ import ThemeSwitcher from "@/components/ThemeSwitcher";
 export default function Home() {
   return (
     <>
-      <Hero />
-      <Marquee />
-      <Numbers />
-      <WorkIndex />
-      <Services />
-      <Process />
-      <Quote />
-      <Contact />
+      <a
+        href="#content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[70] focus:border focus:border-line focus:bg-surface focus:px-4 focus:py-2.5 focus:text-[0.78rem] focus:tracking-[0.14em] focus:text-ink focus:uppercase"
+      >
+        Skip to content
+      </a>
+
+      <main id="content">
+        <Hero />
+        <Marquee />
+        <Numbers />
+        <WorkIndex />
+        <Services />
+        <Process />
+        <Quote />
+        <Contact />
+      </main>
+
       <Footer />
       <ThemeSwitcher />
     </>

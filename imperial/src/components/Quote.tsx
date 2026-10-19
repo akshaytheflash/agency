@@ -6,7 +6,7 @@ import Reveal from "./Reveal";
  */
 export default function Quote() {
   return (
-    <section className="border-b border-line">
+    <section aria-label="Client testimonial" className="border-b border-line">
       <div className="mx-auto w-full max-w-7xl px-6 sm:px-8 lg:px-12">
         <div className="grid grid-cols-1 py-20 lg:grid-cols-12 lg:py-28">
           <Reveal className="lg:col-span-2">

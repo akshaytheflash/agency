@@ -9,6 +9,7 @@ export default function Contact() {
   return (
     <section
       id="contact"
+      aria-labelledby="contact-heading"
       className="scroll-mt-4 border-b border-line bg-surface"
     >
       <div className="mx-auto w-full max-w-7xl px-6 sm:px-8 lg:px-12">
@@ -19,7 +20,10 @@ export default function Contact() {
             </p>
             {/* max-width lives on the h2 so `ch` resolves against the display
                 size (96px), not the wrapper's 17px body font. */}
-            <h2 className="mt-6 max-w-[15ch] text-[clamp(2.5rem,7vw,6rem)] text-ink">
+            <h2
+              id="contact-heading"
+              className="mt-6 max-w-[15ch] text-[clamp(2.5rem,7vw,6rem)] text-ink"
+            >
               Tell us what you need built.
             </h2>
           </Reveal>

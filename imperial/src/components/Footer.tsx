@@ -20,7 +20,7 @@ export default function Footer() {
                 <li key={l.label}>
                   <a
                     href={l.href}
-                    className="link-draw text-[0.78rem] tracking-[0.14em] text-muted uppercase hover:text-ink"
+                    className="link-draw inline-block py-1.5 text-[0.78rem] tracking-[0.14em] text-muted uppercase hover:text-ink"
                   >
                     {l.label}
                   </a>
@@ -36,7 +36,7 @@ export default function Footer() {
           </p>
           <a
             href={mailtoHref}
-            className="text-[0.72rem] tracking-[0.14em] text-muted uppercase hover:text-accent"
+            className="-my-1 inline-block py-1 text-[0.72rem] tracking-[0.14em] text-muted uppercase hover:text-accent"
           >
             {site.email}
           </a>

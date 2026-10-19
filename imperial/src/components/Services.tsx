@@ -7,7 +7,11 @@ import Reveal from "./Reveal";
  */
 export default function Services() {
   return (
-    <section id="services" className="scroll-mt-4 border-b border-line">
+    <section
+      id="services"
+      aria-labelledby="services-heading"
+      className="scroll-mt-4 border-b border-line"
+    >
       <div className="mx-auto w-full max-w-7xl px-6 sm:px-8 lg:px-12">
         <div className="grid grid-cols-1 gap-x-12 py-20 lg:grid-cols-12 lg:py-28">
           {/* sticky label column */}
@@ -17,7 +21,10 @@ export default function Services() {
                 <p className="text-[0.7rem] tracking-[0.24em] text-accent uppercase">
                   02 / Capabilities
                 </p>
-                <h2 className="mt-4 text-[clamp(2rem,4.2vw,3.25rem)] text-ink">
+                <h2
+                  id="services-heading"
+                  className="mt-4 text-[clamp(2rem,4.2vw,3.25rem)] text-ink"
+                >
                   Three things,
                   <br />
                   done properly.

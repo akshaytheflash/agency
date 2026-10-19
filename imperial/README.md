@@ -40,8 +40,15 @@ quote           // the pull-quote + attribution
   "Founder, e-commerce brand". Replace with the client's real name and role once
   they clear you to use it. The quote text itself is yours verbatim.
 - **The work index** — the three entries are your live Aurelia demos. As real
-  client projects land, replace the objects in `work` (keep `image` pointing at a
-  screenshot in `public/work/`).
+  client projects land, replace the objects in `work` (keep `image` pointing at
+  a screenshot in `public/work/`).
+
+### If you add a fourth project
+
+`work` is an array — append an object with `id`, `title`, `tags`, `year`,
+`blurb`, `href` and `image`. Drop the screenshot in `public/work/` as a
+1200×750 WebP and run `npm run optimize-images` if you started from a PNG.
+The preview panel re-measures itself, so a fourth row is handled automatically.
 
 ## Choosing the art direction
 
@@ -73,10 +80,33 @@ lock `bone`, the favicon is the one visual that will not follow.
 - `src/components/` — Hero, Marquee, Numbers, WorkIndex, Services, Process,
   Quote, Contact, Footer, Reveal (scroll reveal), ThemeSwitcher
 - `src/lib/site.ts` — all copy and data
-- `scripts/capture.mjs` — re-shoots the work-index screenshots from the live
-  demo URLs (`node scripts/capture.mjs`, needs Playwright)
-- `scripts/qa.mjs` — visual sweep: screenshots every theme at 1440/820/390,
-  checks console errors, horizontal overflow, heading structure, alt text
+- `public/work/*.webp` — the three work screenshots, 1200×750 WebP
+- `public/og.png` — the 1200×630 social share card
+
+### Scripts
+
+All of these need the site running (`npm run build && npm start -p 3111`) and
+Playwright available.
+
+| Script | What it does |
+| ------ | ------------ |
+| `npm run qa` | Screenshots every theme at 1440/820/390, checks console errors, horizontal overflow, heading structure, alt text, JS-off rendering |
+| `npm run deep-audit` | Contrast per theme per token pair, tap-target sizes, image weight and CLS, marquee seamlessness, focus order, landmark sanity |
+| `npm run interaction-check` | Theme switcher (open/apply/persist/Escape/outside-click), skip link, reduced-motion path, keyboard preview tracking |
+| `npm run audit` | Full-page renders at 1440/1024/820/390 plus a gap report between sections |
+| `npm run crop` | High-resolution crops of each section, so type defects are visible rather than guessed |
+| `npm run shots` | Viewport-accurate shots (not full-page) so fixed overlays appear where they really sit |
+| `npm run og` | Re-renders `public/og.png` from the live page — it cannot drift from the design system |
+| `npm run capture` | Re-shoots the work screenshots from the live Aurelia demos and encodes them to WebP |
+| `npm run optimize-images` | Re-encodes `public/work/*.png` to WebP in place |
+
+### Notes on the work index
+
+The preview in the right-hand column is **pinned to the centre line of the row
+you are pointing at** — it measures the active row and translates to it, so the
+screenshot and the title it belongs to are never in different places. A 2px
+accent tick marks the active row in the left gutter. All three previews stay
+mounted and cross-fade, so swapping them never blanks the frame.
 
 ## Design system
 

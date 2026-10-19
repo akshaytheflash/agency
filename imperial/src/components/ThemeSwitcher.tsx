@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 /**
  * Accent switcher — previews all four art directions live.
@@ -22,28 +22,24 @@ const THEMES = [
     id: "lime",
     name: "Electric",
     swatch: "#C8FF3D",
-    bg: "#0E0E0C",
     note: "Warm near-black, electric lime",
   },
   {
     id: "amber",
     name: "Editorial",
     swatch: "#D97706",
-    bg: "#131110",
     note: "Charcoal, burnt amber",
   },
   {
     id: "bone",
     name: "Gallery",
     swatch: "#2E5A3E",
-    bg: "#EDE7DA",
     note: "Warm paper, imperial pine",
   },
   {
     id: "ice",
     name: "Studio",
     swatch: "#7DD3FC",
-    bg: "#0A0D11",
     note: "Blue-black, glacier blue",
   },
 ] as const;
@@ -54,6 +50,7 @@ export default function ThemeSwitcher() {
   const [theme, setTheme] = useState<string>(THEME_DEFAULT);
   const [open, setOpen] = useState(false);
   const [ready, setReady] = useState(false);
+  const wrapRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     try {
@@ -75,15 +72,40 @@ export default function ThemeSwitcher() {
     }
   }, []);
 
+  // Escape closes, and a click anywhere outside closes.
+  useEffect(() => {
+    if (!open) return;
+
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    const onDown = (e: MouseEvent) => {
+      if (!wrapRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("mousedown", onDown);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onDown);
+    };
+  }, [open]);
+
   if (!ready) return null;
 
   return (
     // Desktop-only: on small screens the fixed pill lands on top of body copy
     // (it covered the hero metadata and a work title at 390px). Picking an art
     // direction is a desktop decision anyway.
-    <div className="fixed bottom-5 left-5 z-50 hidden items-end gap-2 lg:flex">
+    <div
+      ref={wrapRef}
+      className="fixed bottom-5 left-5 z-50 hidden items-end gap-2 lg:flex"
+    >
       {open && (
-        <div className="border border-line bg-surface shadow-[0_20px_50px_-25px_rgba(0,0,0,0.7)]">
+        <div
+          id="theme-picker"
+          className="border border-line bg-surface shadow-[0_20px_50px_-25px_rgba(0,0,0,0.7)]"
+        >
           <p className="border-b border-line px-3.5 py-2 text-[0.6rem] tracking-[0.2em] text-muted uppercase">
             Art direction
           </p>
@@ -104,7 +126,7 @@ export default function ThemeSwitcher() {
                       style={{ backgroundColor: t.swatch }}
                       aria-hidden="true"
                     />
-                    <span className="flex flex-col">
+                    <span className="flex flex-1 flex-col">
                       <span
                         className={`text-[0.74rem] ${
                           isActive ? "text-accent" : "text-ink"
@@ -115,6 +137,15 @@ export default function ThemeSwitcher() {
                       <span className="text-[0.62rem] leading-tight text-muted">
                         {t.note}
                       </span>
+                    </span>
+                    {/* the tick is the non-colour cue for which one is live */}
+                    <span
+                      className={`text-[0.7rem] leading-none ${
+                        isActive ? "text-accent opacity-100" : "opacity-0"
+                      }`}
+                      aria-hidden="true"
+                    >
+                      ✓
                     </span>
                   </button>
                 </li>
@@ -128,6 +159,7 @@ export default function ThemeSwitcher() {
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
+        aria-controls="theme-picker"
         aria-label={open ? "Close theme picker" : "Open theme picker"}
         className="flex items-center gap-2 border border-line bg-surface px-3 py-2.5 shadow-[0_20px_50px_-25px_rgba(0,0,0,0.7)] transition-colors duration-300 hover:border-accent"
       >

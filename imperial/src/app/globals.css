@@ -37,12 +37,14 @@
 
 [data-theme="bone"] {
   /* Bone — gallery. Light warm paper + imperial pine.
-     The one light direction: prove the system inverts cleanly. */
+     The one light direction: prove the system inverts cleanly.
+     --muted is pitched a shade darker than the eye wants: on --surface it
+     has to clear 4.5:1 to pass AA for the 15px label copy that sits on it. */
   --bg: #ede7da;
   --surface: #e4dccb;
   --line: #cdc3ac;
   --ink: #1a1712;
-  --muted: #6b6253;
+  --muted: #665d4e;
   --accent: #2e5a3e;
   --accent-ink: #f3efe6;
   --shade: #2e5a3e12;
@@ -88,7 +90,11 @@
     line-height: 1.65;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    /* `hidden` as the fallback, `clip` where it is supported: clip does not
+       turn the body into a scroll container, so position:sticky keeps
+       resolving against the viewport. */
     overflow-x: hidden;
+    overflow-x: clip;
   }
 
   /* One accent, applied to the selection — a detail template pages never bother with. */
@@ -162,6 +168,9 @@
     transition: none;
   }
   .marquee-track { animation: none !important; }
+  .live-dot { animation: none !important; }
+  .work-preview { transition: none; }
+  .work-tick { transition: none; }
 }
 
 /* ---------- Marquee: pure CSS, duplicated content = seamless loop ---------- */
@@ -180,18 +189,43 @@
   animation-play-state: paused;
 }
 
-/* ---------- Work index: image follows the hovered row ---------- */
+/* ---------- Work index: the preview travels to the row you point at ----------
+   The component writes the transform inline (it measures the active row);
+   the transition lives here. */
 .work-preview {
-  opacity: 0;
-  transform: translateY(-50%) scale(0.985);
-  transition:
-    opacity 500ms cubic-bezier(0.16, 0.8, 0.24, 1),
-    transform 500ms cubic-bezier(0.16, 0.8, 0.24, 1);
+  transform: translate3d(0, 0, 0) translateY(-50%);
+  transition: transform 620ms cubic-bezier(0.16, 0.8, 0.24, 1);
+  will-change: transform;
 }
 
-.work-preview.is-on {
-  opacity: 1;
-  transform: translateY(-50%) scale(1);
+/* A hairline marker on the left edge of the active row. */
+.work-tick {
+  transform: scaleY(0);
+  transition: transform 520ms cubic-bezier(0.16, 0.8, 0.24, 1);
+}
+
+.work-tick.is-on {
+  transform: scaleY(1);
+}
+
+/* "Live" pip next to the preview caption. */
+.live-dot {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 9999px;
+  background: var(--accent);
+  animation: live-pulse 2.8s ease-in-out infinite;
+}
+
+@keyframes live-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
 }
 
 /* Quiet hover: the rule extends, the title shifts a hair. */

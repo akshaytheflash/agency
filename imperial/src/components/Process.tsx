@@ -9,6 +9,7 @@ export default function Process() {
   return (
     <section
       id="process"
+      aria-labelledby="process-heading"
       className="scroll-mt-4 border-b border-line bg-surface"
     >
       <div className="mx-auto w-full max-w-7xl px-6 sm:px-8 lg:px-12">
@@ -18,7 +19,10 @@ export default function Process() {
               <p className="text-[0.7rem] tracking-[0.24em] text-accent uppercase">
                 03 / How it runs
               </p>
-              <h2 className="mt-4 text-[clamp(2rem,4.2vw,3.25rem)] text-ink">
+              <h2
+                id="process-heading"
+                className="mt-4 text-[clamp(2rem,4.2vw,3.25rem)] text-ink"
+              >
                 Three days,
                 <br />
                 four moves.

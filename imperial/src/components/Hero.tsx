@@ -8,14 +8,15 @@ export default function Hero() {
   return (
     <header className="relative border-b border-line">
       <div className="mx-auto w-full max-w-7xl px-6 pt-10 pb-16 sm:px-8 lg:px-12 lg:pt-14 lg:pb-20">
-        {/* top rail — agency mark + one link */}
-        <div className="flex items-baseline justify-between border-b border-line pb-5">
+        {/* top rail — agency mark + one link. Stacks on narrow screens: side
+            by side, the wordmark wrapped onto three lines next to the email. */}
+        <div className="flex flex-col items-start gap-y-2 border-b border-line pb-5 sm:flex-row sm:items-baseline sm:justify-between sm:gap-x-8">
           <span className="text-[0.72rem] font-medium tracking-[0.24em] text-ink uppercase">
             {site.name}
           </span>
           <a
             href={mailtoHref}
-            className="link-draw text-[0.72rem] tracking-[0.18em] text-muted uppercase hover:text-ink"
+            className="link-draw -my-1 inline-block py-1 text-[0.72rem] tracking-[0.18em] text-muted uppercase hover:text-ink"
           >
             {site.email}
           </a>
@@ -51,7 +52,7 @@ export default function Hero() {
               </a>
               <a
                 href="#work"
-                className="link-draw text-[0.9rem] text-ink"
+                className="link-draw -my-1 inline-block py-1 text-[0.9rem] text-ink"
               >
                 {site.ctaSecondary}
               </a>

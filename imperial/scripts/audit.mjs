@@ -24,7 +24,11 @@ for (const w of [1440, 1024, 820, 390]) {
 
   // objective whitespace report: vertical gaps between top-level blocks
   const gaps = await page.evaluate(() => {
-    const blocks = [...document.querySelectorAll("body > header, body > section, body > footer")];
+    const blocks = [
+      ...document.querySelectorAll(
+        "body > header, body > main > section, body > footer",
+      ),
+    ];
     const out = [];
     for (let i = 1; i < blocks.length; i++) {
       const prev = blocks[i - 1].getBoundingClientRect();

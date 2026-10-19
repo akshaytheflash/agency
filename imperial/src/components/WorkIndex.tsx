@@ -1,25 +1,86 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { work, workNote } from "@/lib/site";
 import Reveal from "./Reveal";
 
 /**
  * Work index: an editorial list, not a card grid.
  *
- * Each row is title / blurb / tags / year. On pointer devices, hovering a row
- * fades in a preview of the live site on the right; on touch devices the
- * thumbnail is simply always visible under the row. Every row links to the
- * real deployed URL.
+ * Each row is title / blurb / tags / year. On pointer devices a preview of
+ * the live site floats in the right-hand column and *travels to the row you
+ * are pointing at* — the preview is pinned to the active row's centre line,
+ * so the picture and the title it belongs to are never in different places.
+ * On touch devices the thumbnail sits permanently under the row instead.
+ *
+ * Every row links to the real deployed URL.
  */
 export default function WorkIndex() {
   // Defaults to the first project so the preview column is never dead space;
-  // hovering a row swaps it, and pointer-out returns to the first.
+  // hovering a row swaps it and moves it, pointer-out returns to the first.
   const [active, setActive] = useState<string>(work[0].id);
   const activeItem = work.find((w) => w.id === active) ?? work[0];
 
+  const listRef = useRef<HTMLUListElement | null>(null);
+  const rowRefs = useRef<Record<string, HTMLElement | null>>({});
+  const previewRef = useRef<HTMLDivElement | null>(null);
+
+  // Vertical centre of the active row, measured in the list's own coordinate
+  // space. Null until measured (and on touch layouts, where there is no
+  // preview column to align to).
+  const [anchor, setAnchor] = useState<number | null>(null);
+
+  const measure = useCallback(() => {
+    const list = listRef.current;
+    const preview = previewRef.current;
+    const row = rowRefs.current[active];
+    if (!list || !preview || !row) return;
+
+    // `display: none` on small screens — nothing to align to.
+    if (preview.offsetParent === null) {
+      setAnchor(null);
+      return;
+    }
+
+    const listBox = list.getBoundingClientRect();
+    const rowBox = row.getBoundingClientRect();
+    const previewBox = preview.getBoundingClientRect();
+
+    let centre = rowBox.top - listBox.top + rowBox.height / 2;
+
+    // Keep the whole preview inside the list, so it never rides out over the
+    // section above or the one below.
+    const half = previewBox.height / 2;
+    centre = Math.max(half, Math.min(centre, listBox.height - half));
+
+    setAnchor((prev) =>
+      prev === null || Math.abs(prev - centre) > 0.5 ? centre : prev,
+    );
+  }, [active]);
+
+  useLayoutEffect(() => {
+    measure();
+  }, [measure]);
+
+  useEffect(() => {
+    const list = listRef.current;
+    if (!list || typeof ResizeObserver === "undefined") return;
+    const ro = new ResizeObserver(() => measure());
+    ro.observe(list);
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [measure]);
+
   return (
-    <section id="work" className="scroll-mt-4 border-b border-line">
+    <section
+      id="work"
+      aria-labelledby="work-heading"
+      className="scroll-mt-4 border-b border-line"
+    >
       <div className="mx-auto w-full max-w-7xl px-6 pb-16 pt-20 sm:px-8 lg:px-12 lg:pb-24 lg:pt-28">
         {/* section label — oversized faint numeral behind the word */}
         <div className="relative pt-20 pb-10 lg:pt-28">
@@ -33,7 +94,10 @@ export default function WorkIndex() {
             <p className="text-[0.7rem] tracking-[0.24em] text-accent uppercase">
               01 / Selected work
             </p>
-            <h2 className="mt-4 text-[clamp(2rem,4.6vw,3.5rem)] text-ink">
+            <h2
+              id="work-heading"
+              className="mt-4 text-[clamp(2rem,4.6vw,3.5rem)] text-ink"
+            >
               Three sites, one brief.
             </h2>
             <p className="mt-5 max-w-[58ch] text-[1.02rem] leading-relaxed text-muted">
@@ -44,41 +108,67 @@ export default function WorkIndex() {
 
         {/* the index */}
         <div className="relative">
-          {/* preview panel — follows the hovered row, pointer devices only */}
+          {/* preview panel — travels to the active row's centre line.
+              Pointer devices only; touch gets the inline thumbnail below. */}
           <div
-            className="pointer-events-none absolute top-0 right-0 hidden h-full w-[34%] lg:block"
+            className="pointer-events-none absolute top-0 right-0 hidden w-[34%] lg:block"
             aria-hidden="true"
           >
             <div
-              className={`work-preview absolute top-1/2 right-0 w-full ${
-                activeItem ? "is-on" : ""
-              }`}
+              ref={previewRef}
+              className="work-preview absolute top-0 right-0 w-full"
+              style={
+                anchor === null
+                  ? undefined
+                  : {
+                      transform: `translate3d(0, ${anchor}px, 0) translateY(-50%)`,
+                    }
+              }
             >
-              {activeItem && (
-                <div className="overflow-hidden border border-line bg-surface shadow-[0_24px_60px_-30px_rgba(0,0,0,0.6)]">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={activeItem.image}
-                    alt=""
-                    className="h-auto w-full"
-                    loading="lazy"
-                  />
-                  <p className="border-t border-line px-4 py-3 text-[0.66rem] tracking-[0.18em] text-muted uppercase">
-                    {activeItem.title} — live
-                  </p>
+              <div className="overflow-hidden border border-line bg-surface shadow-[0_24px_60px_-30px_rgba(0,0,0,0.6)]">
+                {/* All three are mounted and cross-faded. Swapping `src` on a
+                    single <Image> blanks the frame for a frame while the new
+                    file decodes; stacking them means the swap is a fade. */}
+                <div className="relative aspect-[1200/750] w-full bg-surface">
+                  {work.map((w) => (
+                    <Image
+                      key={w.id}
+                      src={w.image}
+                      alt=""
+                      width={1200}
+                      height={750}
+                      sizes="(min-width: 1280px) 403px, (min-width: 1024px) 34vw, 0px"
+                      className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-500 ${
+                        active === w.id ? "opacity-100" : "opacity-0"
+                      }`}
+                    />
+                  ))}
                 </div>
-              )}
+                <p className="flex items-center gap-2.5 border-t border-line px-4 py-3 text-[0.66rem] tracking-[0.18em] text-muted uppercase">
+                  <span className="live-dot" aria-hidden="true" />
+                  {activeItem.title} — live
+                </p>
+              </div>
             </div>
           </div>
 
-          <ul className="relative lg:w-[62%]">
+          <ul ref={listRef} className="relative lg:w-[62%]">
             {work.map((w, i) => (
               <Reveal
                 as="li"
                 key={w.id}
                 delay={i * 90}
-                className="border-t border-line last:border-b"
+                ref={(node) => {
+                  rowRefs.current[w.id] = node;
+                }}
+                className="relative border-t border-line last:border-b"
               >
+                <span
+                  aria-hidden="true"
+                  className={`work-tick absolute top-0 -left-3 hidden h-full w-[2px] origin-top bg-accent lg:block ${
+                    active === w.id ? "is-on" : ""
+                  }`}
+                />
                 <a
                   href={w.href}
                   target="_blank"
@@ -107,13 +197,17 @@ export default function WorkIndex() {
 
                     {/* mobile / touch preview, always visible */}
                     <div className="mt-4 overflow-hidden border border-line lg:hidden">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
+                      <Image
                         src={w.image}
                         alt={`Screenshot of the ${w.title} build`}
+                        width={1200}
+                        height={750}
+                        sizes="(min-width: 1024px) 0px, 92vw"
                         className="h-auto w-full"
-                        loading="lazy"
                       />
+                      <p className="border-t border-line px-4 py-2.5 text-[0.62rem] tracking-[0.18em] text-muted uppercase">
+                        {w.title} — live
+                      </p>
                     </div>
                   </div>
 
@@ -131,6 +225,9 @@ export default function WorkIndex() {
                     </span>
                   </div>
                 </a>
+                <span className="sr-only">
+                  {w.title} — opens in a new tab
+                </span>
               </Reveal>
             ))}
           </ul>

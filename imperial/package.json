@@ -5,7 +5,16 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "qa": "node scripts/qa.mjs",
+    "audit": "node scripts/audit.mjs",
+    "deep-audit": "node scripts/deep-audit.mjs",
+    "interaction-check": "node scripts/interaction-check.mjs",
+    "crop": "node scripts/crop.mjs",
+    "shots": "node scripts/viewport-shots.mjs",
+    "og": "node scripts/og.mjs",
+    "capture": "node scripts/capture.mjs",
+    "optimize-images": "node scripts/optimize-work-images.mjs"
   },
   "dependencies": {
     "next": "16.4.1",
@@ -17,6 +26,7 @@
     "@types/node": "22.10.2",
     "@types/react": "19.2.0",
     "@types/react-dom": "19.2.0",
+    "sharp": "0.35.5",
     "tailwindcss": "4.3.3",
     "typescript": "5.9.2"
   }

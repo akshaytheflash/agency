@@ -27,7 +27,9 @@ export const numbers = [
   { figure: "4", unit: "engineers", label: "No subcontractors, no juniors learning on your budget." },
 ] as const;
 
-/* ---------- Work index. Three demo builds, one brief. ---------- */
+/* ---------- Work index. Three demo builds, one brief. ----------
+   Images are 1200x750 WebP, served through next/image so the browser gets
+   a right-sized file and the layout never shifts. */
 export const work = [
   {
     id: "lumen",
@@ -36,7 +38,7 @@ export const work = [
     year: "2026",
     blurb: "Warm monochrome, wide serif, flat bento, hairline rules.",
     href: "https://aurelia-01-lumen.vercel.app",
-    image: "/work/lumen.png",
+    image: "/work/lumen.webp",
   },
   {
     id: "noir",
@@ -45,7 +47,7 @@ export const work = [
     year: "2026",
     blurb: "Near-black, brass hairlines, full-bleed photography, slow reveals.",
     href: "https://aurelia-02-noir.vercel.app",
-    image: "/work/noir.png",
+    image: "/work/noir.webp",
   },
   {
     id: "terra",
@@ -54,7 +56,7 @@ export const work = [
     year: "2026",
     blurb: "Terracotta and olive, chunky rounded type, arched imagery.",
     href: "https://aurelia-03-terra.vercel.app",
-    image: "/work/terra.png",
+    image: "/work/terra.webp",
   },
 ] as const;
 

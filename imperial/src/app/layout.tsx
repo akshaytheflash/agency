@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Instrument_Serif, Inter } from "next/font/google";
 import "./globals.css";
 import { site } from "@/lib/site";
@@ -17,13 +17,20 @@ const inter = Inter({
   display: "swap",
 });
 
+const ORIGIN = "https://imperial-development.vercel.app";
+const TITLE = `${site.name} — Real websites, live in three days`;
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://imperial-development.vercel.app"),
+  metadataBase: new URL(ORIGIN),
   title: {
-    default: `${site.name} — Real websites, live in three days`,
+    default: TITLE,
     template: `%s — ${site.name}`,
   },
   description: site.lede,
+  applicationName: site.name,
+  authors: [{ name: site.name, url: ORIGIN }],
+  creator: site.email,
+  publisher: site.name,
   keywords: [
     "web development agency",
     "Next.js agency",
@@ -32,20 +39,39 @@ export const metadata: Metadata = {
     "New Delhi",
     "India web agency",
   ],
+  alternates: { canonical: "/" },
   openGraph: {
-    title: `${site.name} — Real websites, live in three days`,
+    title: TITLE,
     description: site.lede,
-    url: "https://imperial-development.vercel.app",
+    url: ORIGIN,
     siteName: site.name,
     locale: "en_IN",
     type: "website",
+    images: [
+      {
+        url: "/og.png",
+        width: 1200,
+        height: 630,
+        alt: `${site.name} — ${site.headline}`,
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: `${site.name} — Real websites, live in three days`,
+    title: TITLE,
     description: site.lede,
+    images: ["/og.png"],
   },
   robots: { index: true, follow: true },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ede7da" },
+    { media: "(prefers-color-scheme: dark)", color: "#0e0e0c" },
+  ],
 };
 
 /* Runs before first paint:
@@ -57,15 +83,53 @@ const themeInit = `document.documentElement.classList.add('js');try{var t=localS
 
 const orgJsonLd = {
   "@context": "https://schema.org",
-  "@type": "Organization",
+  "@type": "ProfessionalService",
   name: site.name,
+  alternateName: site.shortName,
+  url: ORIGIN,
+  logo: `${ORIGIN}/icon.svg`,
+  image: `${ORIGIN}/og.png`,
   email: site.email,
-  foundingDate: site.founded,
   description: site.lede,
+  foundingDate: `${site.founded}-01-01`,
+  priceRange: "$$$",
   address: {
     "@type": "PostalAddress",
     addressLocality: "New Delhi",
     addressCountry: "IN",
+  },
+  areaServed: [
+    { "@type": "Country", name: "India" },
+    { "@type": "Place", name: "Worldwide" },
+  ],
+  knowsAbout: [
+    "Web development",
+    "Next.js",
+    "E-commerce",
+    "SaaS",
+    "Design systems",
+    "DevOps",
+    "AI integration",
+  ],
+  contactPoint: {
+    "@type": "ContactPoint",
+    contactType: "sales",
+    email: site.email,
+    availableLanguage: ["en"],
+    hoursAvailable: {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+      ],
+      opens: "00:00",
+      closes: "23:59",
+    },
   },
 };
 
@@ -73,7 +137,11 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${instrument.variable} ${inter.variable}`}>
+    <html
+      lang="en"
+      data-theme="lime"
+      className={`${instrument.variable} ${inter.variable}`}
+    >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInit }} />
         <script
